@@ -3,218 +3,165 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>杭州学区地图 | 杭州入学一站式指南</title>
+  <title>杭州学区地图 · 查询与管理后台</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Han+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="logo">杭州学区指南</div>
-    <nav class="site-nav">
-      <a href="#districtGrid">重点学区</a>
-      <a href="#schoolsSection">学校清单</a>
-      <a href="#timeline">入学日程</a>
-      <a href="#resources">政策信息</a>
-    </nav>
-    <button class="cta-button">一键咨询</button>
+  <header class="app-header">
+    <div class="brand">
+      <p class="brand__tag">2025 杭州义务教育数据</p>
+      <h1>杭州学区快速查询</h1>
+      <p class="brand__desc">左侧地图实时切换小学 / 初中学区，右侧同步展示覆盖小区与对口学校，支持后台在线维护数据。</p>
+    </div>
+    <div class="stage-tabs" id="stageTabs" role="tablist" aria-label="学区阶段切换">
+      <button type="button" data-stage="小学" class="active" role="tab" aria-selected="true">小学学区</button>
+      <button type="button" data-stage="初中" role="tab" aria-selected="false">初中学区</button>
+    </div>
+    <button class="ghost-button" id="scrollAdmin" type="button">打开管理后台</button>
   </header>
 
-  <main>
-    <section class="hero">
-      <div class="hero__content">
-        <p class="hero__tag">2025 入学季全新数据</p>
-        <h1>快速了解杭州热门学区与优质公办民办学校</h1>
-        <p class="hero__subtitle">整合西湖、滨江、钱塘等重点学区政策、学校口碑与入学时间表，助你 10 分钟建立专属选校清单。</p>
-        <div class="hero__actions">
-          <div class="search-box">
-            <span>🔍</span>
-            <input id="searchInput" type="search" placeholder="搜索学校 / 学区 / 关键词">
+  <main class="main-layout">
+    <section class="map-panel">
+      <div class="panel-card">
+        <div class="panel-card__toolbar">
+          <label>
+            <span>行政区筛选</span>
+            <select id="districtFilter">
+              <option value="all">全部区域</option>
+            </select>
+          </label>
+          <label>
+            <span>关键词</span>
+            <input id="keywordInput" type="search" placeholder="输入学区 / 小区 / 学校" autocomplete="off">
+          </label>
+          <div class="toolbar-stats">
+            <span class="toolbar-stats__value" id="zoneCount">0</span>
+            <span>可视学区</span>
           </div>
-          <button class="primary" id="quickMatch">智能匹配</button>
         </div>
-        <div class="hero__stats">
+        <div id="mapGrid" class="map-grid" role="region" aria-live="polite" aria-label="杭州市学区示意图"></div>
+        <p class="panel-card__hint">点击色块可高亮学区并在右侧查看详情，再次点击可取消选择。</p>
+      </div>
+    </section>
+
+    <section class="info-panel" id="infoPanel">
+      <article class="info-card">
+        <header class="info-card__header">
+          <p class="chip" id="infoStage">小学</p>
+          <h2 id="infoTitle">请选择一个色块</h2>
+          <p id="infoSubtitle">地图中颜色越深代表优先级越高，选择后可查看该片区的政策提醒与覆盖小区。</p>
+        </header>
+        <dl class="info-meta">
           <div>
-            <strong id="statDistricts">0</strong>
-            <span>热门学区</span>
+            <dt>行政区</dt>
+            <dd id="infoDistrict">-</dd>
           </div>
           <div>
-            <strong id="statSchools">0</strong>
-            <span>重点学校</span>
+            <dt>政策提醒</dt>
+            <dd id="infoPolicy">-</dd>
           </div>
-          <div>
-            <strong>72h</strong>
-            <span>更新频率</span>
+        </dl>
+        <section class="list-block">
+          <div class="list-head">
+            <h3>覆盖小区 / 楼盘</h3>
+            <span id="communityCount">0 个</span>
           </div>
-        </div>
-      </div>
-      <div class="hero__card">
-        <h3>杭州2025 入学重点提醒</h3>
-        <ul>
-          <li>民办电脑派位预计 5 月下旬进行</li>
-          <li>部分区小学仍需现场信息确认</li>
-          <li>热门公办仍以学区房产证时间为序</li>
-        </ul>
-        <button class="secondary">下载最新政策 PDF</button>
-      </div>
-    </section>
-
-    <section class="filters">
-      <div class="filter-group">
-        <label for="districtFilter">学区</label>
-        <select id="districtFilter">
-          <option value="all">全部</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>关注标签</label>
-        <div class="tag-filter" id="tagFilter">
-          <button data-tag="公办">公办</button>
-          <button data-tag="民办">民办</button>
-          <button data-tag="学军系">学军系</button>
-          <button data-tag="科技特色">科技特色</button>
-          <button data-tag="双语">双语</button>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>课程阶段</label>
-        <div class="stage-filter">
-          <label><input type="checkbox" value="小学" checked> 小学</label>
-          <label><input type="checkbox" value="初中" checked> 初中</label>
-          <label><input type="checkbox" value="九年一贯" checked> 九年一贯</label>
-        </div>
-      </div>
-    </section>
-
-    <section class="district-map" id="districtMap">
-      <div class="section-header">
-        <div>
-          <p class="section-tag">学区地图</p>
-          <h2>小学 / 初中学区划分一目了然</h2>
-        </div>
-        <div class="map-stage-toggle" id="mapStageToggle" role="tablist" aria-label="选择学区阶段">
-          <button type="button" data-stage="小学" class="active" role="tab" aria-selected="true">小学</button>
-          <button type="button" data-stage="初中" role="tab" aria-selected="false">初中</button>
-        </div>
-      </div>
-      <p class="map-subtitle">根据公开入学政策整理，将杭州市重点片区按课程阶段拆分，配合集团学校与入学关注点，帮助家庭快速锁定目标学区。</p>
-      <div class="map-legend">
-        <div class="legend-item">
-          <span class="legend-color legend-color--primary"></span>
-          <div>
-            <p>小学片区</p>
-            <small>以集团小学、九年一贯小学部为主</small>
+          <ul id="communityList" class="pill-list"></ul>
+        </section>
+        <section class="list-block">
+          <div class="list-head">
+            <h3>对应学校</h3>
+            <span id="schoolCount">0 所</span>
           </div>
-        </div>
-        <div class="legend-item">
-          <span class="legend-color legend-color--secondary"></span>
-          <div>
-            <p>初中片区</p>
-            <small>以初中部、九年一贯初中段为主</small>
-          </div>
-        </div>
-      </div>
-      <div class="map-canvas" id="mapCanvas" aria-live="polite"></div>
-      <div class="map-details" id="mapDetails"></div>
-    </section>
-
-    <section class="district-grid" id="districtGrid"></section>
-
-    <section class="schools" id="schoolsSection">
-      <div class="section-header">
-        <div>
-          <p class="section-tag">杭州重点学校清单</p>
-          <h2>按照学区与课程阶段筛选</h2>
-        </div>
-        <button class="secondary" id="resetFilters">重置筛选</button>
-      </div>
-      <div class="school-list" id="schoolList"></div>
-    </section>
-
-    <section class="timeline" id="timeline">
-      <h2>2025 入学时间表</h2>
-      <div class="timeline__grid">
-        <article>
-          <span class="timeline__date">3 月</span>
-          <h3>材料准备</h3>
-          <p>核对户籍、房产、居住证明及学籍信息，部分区需在线预约。</p>
-        </article>
-        <article>
-          <span class="timeline__date">4 月</span>
-          <h3>网上报名</h3>
-          <p>各区教育局开放报名系统，需提前完成信息核验。</p>
-        </article>
-        <article>
-          <span class="timeline__date">5-6 月</span>
-          <h3>电脑派位 / 现场确认</h3>
-          <p>民办学校统一电脑派位，未录取自动回流公办。</p>
-        </article>
-        <article>
-          <span class="timeline__date">7-8 月</span>
-          <h3>录取与报到</h3>
-          <p>公办学校陆续发放录取通知，需按校要求完成报到。</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="resources" id="resources">
-      <div class="section-header">
-        <div>
-          <p class="section-tag">政策与数据</p>
-          <h2>快速掌握真实信息</h2>
-        </div>
-        <button class="secondary">订阅政策更新</button>
-      </div>
-      <div class="resource-grid">
-        <article>
-          <h3>官方政策速递</h3>
-          <p>同步杭州教育局与各区教育局最新文件，提供 PDF 下载与关键解读。</p>
-          <a href="#">查看政策 →</a>
-        </article>
-        <article>
-          <h3>家长口碑热度</h3>
-          <p>收集 300+ 家长真实反馈，结合学业表现与社团资源形成热度评分。</p>
-          <a href="#">查看评分 →</a>
-        </article>
-        <article>
-          <h3>房产与学籍提醒</h3>
-          <p>各区锁定政策不同，自动提醒房产年限、落户天数等硬性指标。</p>
-          <a href="#">获取提醒 →</a>
-        </article>
-      </div>
-    </section>
-
-    <section class="faq">
-      <h2>常见问题</h2>
-      <div class="faq__list">
-        <details open>
-          <summary>热门公办学区的招生顺序如何？</summary>
-          <p>多数区采用“人户一致优先 → 多孩 → 人户分离”的顺序，若仍超额则按房产证时间或电脑派位。</p>
-        </details>
-        <details>
-          <summary>民办学校还能跨区报名吗？</summary>
-          <p>根据 2023 年起执行的新政，民办义务段学校继续坚持全市统筹电脑派位，跨区报名不受限。</p>
-        </details>
-        <details>
-          <summary>九年一贯学校需要单独派位吗？</summary>
-          <p>部分九年一贯学校的小初衔接需要参加内部考察或综合评价，建议提前关注校内通知。</p>
-        </details>
-      </div>
+          <ul id="schoolList" class="school-list"></ul>
+        </section>
+      </article>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div>
-      <strong>杭州学区指南</strong>
-      <p>基于公开数据与家长实地探访整理，帮助家庭高效决策。</p>
+  <section class="admin-panel" id="adminSection">
+    <div class="admin-bar">
+      <div>
+        <p class="brand__tag">数据管理</p>
+        <h2>后台维护学区与小区</h2>
+        <p class="brand__desc">支持新增 / 编辑 / 删除学区信息，数据自动缓存到浏览器本地。</p>
+      </div>
+      <button id="collapseAdmin" class="ghost-button" type="button" aria-expanded="true">收起后台</button>
     </div>
-    <div>
-      <p>咨询微信：hz-school</p>
-      <p>合作邮箱：edu@hzplanner.cn</p>
+    <div class="admin-content" id="adminContent">
+      <form id="zoneForm" class="admin-form">
+        <input type="hidden" id="zoneId">
+        <div class="form-row">
+          <label>学区名称
+            <input type="text" id="zoneNameInput" required placeholder="如：西湖 · 紫金港学军圈">
+          </label>
+          <label>行政区
+            <input type="text" id="zoneDistrictInput" required placeholder="西湖区">
+          </label>
+          <label>阶段
+            <select id="zoneStageInput" required>
+              <option value="小学">小学</option>
+              <option value="初中">初中</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label>地图主色（HEX）
+            <input type="text" id="zoneColorInput" required placeholder="#4c7dff">
+          </label>
+          <label>政策提醒
+            <input type="text" id="zonePolicyInput" required placeholder="人户一致优先 / 名额分配等">
+          </label>
+          <label>一句话描述
+            <input type="text" id="zoneDescInput" required placeholder="概述片区特点">
+          </label>
+        </div>
+        <div class="form-row">
+          <label>地图列（1-4）
+            <input type="number" id="zoneColStartInput" min="1" max="4" value="1">
+          </label>
+          <label>列跨度
+            <input type="number" id="zoneColSpanInput" min="1" max="2" value="1">
+          </label>
+          <label>地图行（1-4）
+            <input type="number" id="zoneRowStartInput" min="1" max="4" value="1">
+          </label>
+          <label>行跨度
+            <input type="number" id="zoneRowSpanInput" min="1" max="2" value="1">
+          </label>
+        </div>
+        <label>覆盖小区（每行一个，可加备注：小区名|别名）
+          <textarea id="zoneCommunitiesInput" rows="3" placeholder="黄龙世纪苑|西溪校区&#10;天目山庄"></textarea>
+        </label>
+        <label>直配学校（格式：学校名|阶段|说明）
+          <textarea id="zoneSchoolsInput" rows="3" placeholder="学军小学紫金港|小学|集团本部&#10;文二教育集团|小学|科技特色"></textarea>
+        </label>
+        <div class="form-actions">
+          <button type="submit" class="primary-btn">保存 / 更新</button>
+          <button type="button" id="resetForm" class="ghost-button">清空表单</button>
+        </div>
+      </form>
+
+      <div class="admin-table-wrapper">
+        <table id="zoneTable">
+          <thead>
+            <tr>
+              <th>学区</th>
+              <th>阶段</th>
+              <th>行政区</th>
+              <th>小区数</th>
+              <th>学校数</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
-    <small>© 2025 Hangzhou School Planner</small>
-  </footer>
+  </section>
 
   <script src="script.js" defer></script>
 </body>

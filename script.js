@@ -1,457 +1,650 @@
-const districtData = [
-  {
-    id: "xihu",
-    name: "西湖区",
-    category: "重点教育",
-    focus: "学军系、公办强",
-    desc: "学军教育集团覆盖面广，学科竞赛与科技类活动突出。",
-    highlights: ["学军小学紫金港校区", "文二教育集团"],
-    stats: { schools: 18, avgScore: 94 }
-  },
-  {
-    id: "binjiang",
-    name: "滨江区",
-    category: "科技创新",
-    focus: "互联网家庭聚集",
-    desc: "依托高新区资源，科技与国际化课程资源丰富。",
-    highlights: ["滨和实验小学", "杭师大附外"],
-    stats: { schools: 12, avgScore: 91 }
-  },
-  {
-    id: "gongshu",
-    name: "拱墅区",
-    category: "老牌强区",
-    focus: "优质九年一贯",
-    desc: "传统教育资源扎实，近年来大力度更新学校硬件。",
-    highlights: ["求是教育集团", "上塘中学"] ,
-    stats: { schools: 14, avgScore: 89 }
-  },
-  {
-    id: "shangcheng",
-    name: "上城区",
-    category: "历史文脉",
-    focus: "名校扎堆",
-    desc: "老城区基础好，择校需求多样，国际与艺术特色并存。",
-    highlights: ["杭州娃哈哈小学", "杭高教育集团"],
-    stats: { schools: 16, avgScore: 92 }
-  },
-  {
-    id: "qiantang",
-    name: "钱塘区",
-    category: "新兴区域",
-    focus: "配套提速",
-    desc: "大江东、下沙合并后规划统一，优质公办逐步落地。",
-    highlights: ["下沙第二小学", "采荷教育集团"],
-    stats: { schools: 10, avgScore: 86 }
-  }
-];
+const STORAGE_KEY = "hz-school-zones-v1";
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-const schoolData = [
+const normalizeZone = (zone) => {
+  const layout = zone.layout || {};
+  const colStart = clamp(Number(layout.colStart) || 1, 1, 4);
+  const colEnd = clamp(Number(layout.colEnd) || colStart + 1, colStart + 1, 5);
+  const rowStart = clamp(Number(layout.rowStart) || 1, 1, 4);
+  const rowEnd = clamp(Number(layout.rowEnd) || rowStart + 1, rowStart + 1, 5);
+
+  return {
+    ...zone,
+    layout: { colStart, colEnd, rowStart, rowEnd },
+    communities: Array.isArray(zone.communities) ? zone.communities : [],
+    schools: Array.isArray(zone.schools) ? zone.schools : []
+  };
+};
+
+const defaultZones = [
   {
-    name: "学军小学紫金港校区",
-    district: "西湖区",
+    id: "xihu-primary",
     stage: "小学",
-    type: "公办",
-    tags: ["学军系", "科技特色"],
-    score: 96,
-    address: "西湖区紫金港路 700 号",
-    features: "STEM+英语深度融合",
-    hotline: "0571-8500 1234"
-  },
-  {
-    name: "学军中学竞舟校区",
+    name: "西湖 · 紫金港学军圈",
     district: "西湖区",
-    stage: "初中",
-    type: "公办",
-    tags: ["学军系"],
-    score: 95,
-    address: "西湖区竞舟路 357 号",
-    features: "数理竞赛与社团丰富",
-    hotline: "0571-8500 5678"
+    description: "覆盖紫金港与西溪板块，学军集团统筹，STEM 资源与竞赛氛围浓厚。",
+    policy: "人户一致优先；落户满 2 年且学籍完整方可排位，集团校指标分配。",
+    color: "#4c7dff",
+    layout: { colStart: 1, colEnd: 3, rowStart: 1, rowEnd: 3 },
+    communities: [
+      { name: "黄龙世纪苑", alias: "学军房" },
+      { name: "紫金港北苑", alias: "" },
+      { name: "西溪北苑", alias: "" },
+      { name: "融创河畔", alias: "" }
+    ],
+    schools: [
+      { name: "学军小学紫金港校区", stage: "小学", note: "集团本部" },
+      { name: "文二教育集团紫金港", stage: "小学", note: "科技社团" }
+    ]
   },
   {
-    name: "滨和实验小学",
-    district: "滨江区",
+    id: "binjiang-primary",
     stage: "小学",
-    type: "公办",
-    tags: ["科技特色"],
-    score: 92,
-    address: "滨江区滨和路 66 号",
-    features: "编程社团覆盖一至六年级",
-    hotline: "0571-8888 1200"
-  },
-  {
-    name: "杭师大附外",
+    name: "滨江 · 高新科创圈",
     district: "滨江区",
-    stage: "九年一贯",
-    type: "民办",
-    tags: ["双语", "民办"],
-    score: 90,
-    address: "滨江区江汉路 30 号",
-    features: "双语课程+海外交流",
-    hotline: "0571-8722 9000"
+    description: "依托高新区家庭，双语与编程社团覆盖 1-6 年级，师资年轻。",
+    policy: "自有住房年限排序；重点楼盘需完成线上信息核验后确认。",
+    color: "#ff8b5d",
+    layout: { colStart: 3, colEnd: 5, rowStart: 1, rowEnd: 3 },
+    communities: [
+      { name: "联庄", alias: "高新老盘" },
+      { name: "滨江金茂悦", alias: "科技城" },
+      { name: "滨和名家", alias: "滨和路" },
+      { name: "闻涛苑", alias: "沿江" }
+    ],
+    schools: [
+      { name: "滨和实验小学", stage: "小学", note: "科创社团" },
+      { name: "杭师大附外小学部", stage: "小学", note: "双语课程" }
+    ]
   },
   {
-    name: "求是教育集团文澜实验",
+    id: "shangcheng-primary",
+    stage: "小学",
+    name: "上城 · 钱江新城名校圈",
+    district: "上城区",
+    description: "钱江新城与城站沿线，民办与公办名校扎堆，艺术资源丰富。",
+    policy: "热门民办摇号为主，公办按房产证时间排序。",
+    color: "#f25ba3",
+    layout: { colStart: 2, colEnd: 4, rowStart: 3, rowEnd: 5 },
+    communities: [
+      { name: "御景蓝湾", alias: "庆春隧道" },
+      { name: "复兴印象城", alias: "江景" },
+      { name: "钱江府", alias: "城站" },
+      { name: "望江公馆", alias: "老城区" }
+    ],
+    schools: [
+      { name: "杭州娃哈哈小学", stage: "小学", note: "民办双语" },
+      { name: "胜利实验学校小学部", stage: "小学", note: "集团化" }
+    ]
+  },
+  {
+    id: "gongshu-primary",
+    stage: "小学",
+    name: "拱墅 · 大运河九年一贯",
     district: "拱墅区",
-    stage: "九年一贯",
-    type: "公办",
-    tags: ["公办", "特色课程"],
-    score: 89,
-    address: "拱墅区湖墅南路 288 号",
-    features: "书院式课程体系",
-    hotline: "0571-8521 7788"
+    description: "大关、申花九年一贯资源集中，集团化办学，直升空间大。",
+    policy: "九年一贯小学段按积分排队，严控跨片插班。",
+    color: "#3cc8b3",
+    layout: { colStart: 1, colEnd: 2, rowStart: 3, rowEnd: 5 },
+    communities: [
+      { name: "大关南苑", alias: "大运河" },
+      { name: "申花板块", alias: "运河商务" },
+      { name: "香积寺巷", alias: "城北" },
+      { name: "运河宸院", alias: "申花新盘" }
+    ],
+    schools: [
+      { name: "文澜实验小学部", stage: "小学", note: "九年一贯" },
+      { name: "求是教育集团小学", stage: "小学", note: "集团化" }
+    ]
   },
   {
-    name: "杭州娃哈哈小学",
-    district: "上城区",
+    id: "qiantang-primary",
     stage: "小学",
-    type: "民办",
-    tags: ["民办", "双语"],
-    score: 91,
-    address: "上城区美政路 38 号",
-    features: "双语浸润+艺术社团",
-    hotline: "0571-8706 5566"
-  },
-  {
-    name: "杭高求是实验学校",
-    district: "上城区",
-    stage: "初中",
-    type: "公办",
-    tags: ["公办", "创新课程"],
-    score: 93,
-    address: "上城区凤山路 188 号",
-    features: "项目式学习+人工智能课程",
-    hotline: "0571-8707 1357"
-  },
-  {
-    name: "采荷实验学校钱塘校区",
+    name: "钱塘 · 金沙湖沿江",
     district: "钱塘区",
-    stage: "九年一贯",
-    type: "公办",
-    tags: ["公办", "集团化"],
-    score: 87,
-    address: "钱塘区金沙大道 88 号",
-    features: "集团资源共享，社团覆盖 30+",
-    hotline: "0571-8686 9008"
-  }
-];
-
-const tagButtons = document.querySelectorAll("#tagFilter button");
-const districtSelect = document.querySelector("#districtFilter");
-const stageCheckboxes = document.querySelectorAll(".stage-filter input");
-const schoolList = document.querySelector("#schoolList");
-const searchInput = document.querySelector("#searchInput");
-const districtGrid = document.querySelector("#districtGrid");
-const statDistricts = document.querySelector("#statDistricts");
-const statSchools = document.querySelector("#statSchools");
-const resetButton = document.querySelector("#resetFilters");
-const quickMatchButton = document.querySelector("#quickMatch");
-const mapStageButtons = document.querySelectorAll("#mapStageToggle button");
-const mapCanvas = document.querySelector("#mapCanvas");
-const mapDetails = document.querySelector("#mapDetails");
-
-const activeTags = new Set();
-
-const mapZones = [
-  {
-    id: "primary-xihu",
-    name: "西湖 · 文教圈",
-    stage: "小学",
-    coverage: "学军小学、文二教育集团",
-    focus: "积分排序 + 人户一致优先",
-    grid: { colStart: 1, colEnd: 3, rowStart: 1, rowEnd: 2 }
+    description: "金沙湖与江东新城新盘集中，指定划片，社区配套加速完善。",
+    policy: "新盘执行登记顺序+房产年限并行，部分楼盘需抽签。",
+    color: "#f6a21e",
+    layout: { colStart: 3, colEnd: 5, rowStart: 3, rowEnd: 5 },
+    communities: [
+      { name: "金沙湖壹号", alias: "湖景" },
+      { name: "东城金座", alias: "大学城" },
+      { name: "金沙学府", alias: "沿江" },
+      { name: "恒大水晶国际", alias: "东段" }
+    ],
+    schools: [
+      { name: "采荷实验学校钱塘", stage: "小学", note: "集团派位" },
+      { name: "下沙第二小学", stage: "小学", note: "直配" }
+    ]
   },
   {
-    id: "primary-binj",
-    name: "滨江 · 高新走廊",
-    stage: "小学",
-    coverage: "滨和实验、浦沿小学集团",
-    focus: "科技社团 + 高知家庭集中",
-    grid: { colStart: 3, colEnd: 5, rowStart: 1, rowEnd: 2 }
-  },
-  {
-    id: "primary-gongshu",
-    name: "拱墅 · 大运河",
-    stage: "小学",
-    coverage: "文澜实验、求是教育集团",
-    focus: "九年一贯小学部占比高",
-    grid: { colStart: 1, colEnd: 3, rowStart: 2, rowEnd: 3 }
-  },
-  {
-    id: "primary-shangcheng",
-    name: "上城 · 钱江新城",
-    stage: "小学",
-    coverage: "娃哈哈小学、胜利教育集团",
-    focus: "民办 & 公办名校扎堆",
-    grid: { colStart: 3, colEnd: 5, rowStart: 2, rowEnd: 3 }
-  },
-  {
-    id: "primary-qiantang",
-    name: "钱塘 · 沿江融合",
-    stage: "小学",
-    coverage: "采荷实验钱塘、下沙二小",
-    focus: "新盘集中 + 指定划片",
-    grid: { colStart: 5, colEnd: 7, rowStart: 2, rowEnd: 3 }
-  },
-  {
-    id: "middle-xihu",
+    id: "xihu-middle",
+    stage: "初中",
     name: "西湖 · 学军中学圈",
-    stage: "初中",
-    coverage: "学军中学本部、竞舟校区",
-    focus: "名额分配 + 竞赛资源",
-    grid: { colStart: 1, colEnd: 3, rowStart: 1, rowEnd: 2 }
+    district: "西湖区",
+    description: "学军中学本部+竞舟校区，名额分配比例高，竞赛资源突出。",
+    policy: "人户一致优先，电脑摇号与配额并行。",
+    color: "#2b50ff",
+    layout: { colStart: 1, colEnd: 2, rowStart: 1, rowEnd: 3 },
+    communities: [
+      { name: "翠苑三区", alias: "翠苑" },
+      { name: "学院路沿线", alias: "文教区" },
+      { name: "文三路创意街区", alias: "高新" }
+    ],
+    schools: [
+      { name: "学军中学本部", stage: "初中", note: "名额分配" },
+      { name: "学军中学竞舟校区", stage: "初中", note: "竞赛强" }
+    ]
   },
   {
-    id: "middle-binj",
+    id: "binjiang-middle",
+    stage: "初中",
     name: "滨江 · 浙师附中圈",
-    stage: "初中",
-    coverage: "杭师大附外、滨文中学",
-    focus: "科创课程 + 双语融合",
-    grid: { colStart: 3, colEnd: 5, rowStart: 1, rowEnd: 2 }
+    district: "滨江区",
+    description: "塍江与奥体沿线，重视科创课程与双语融合。",
+    policy: "集团化名额分配 + 科创特长生统筹。",
+    color: "#00b5d8",
+    layout: { colStart: 2, colEnd: 4, rowStart: 1, rowEnd: 2 },
+    communities: [
+      { name: "江南名府", alias: "高新" },
+      { name: "国信嘉园", alias: "奥体" },
+      { name: "奥体万象城", alias: "亚运村" }
+    ],
+    schools: [
+      { name: "杭师大附外初中部", stage: "初中", note: "双语" },
+      { name: "滨文中学", stage: "初中", note: "科创课程" }
+    ]
   },
   {
-    id: "middle-gongshu",
-    name: "拱墅 · 文澜实验",
+    id: "gongshu-middle",
     stage: "初中",
-    coverage: "文澜中学、上塘中学",
-    focus: "集团化直升 + 转学严控",
-    grid: { colStart: 1, colEnd: 3, rowStart: 2, rowEnd: 3 }
+    name: "拱墅 · 文澜实验圈",
+    district: "拱墅区",
+    description: "文澜、启正等九年一贯初中部集中，直升率高。",
+    policy: "九年一贯优先直升，外来家庭需积分。",
+    color: "#25b38a",
+    layout: { colStart: 1, colEnd: 3, rowStart: 3, rowEnd: 5 },
+    communities: [
+      { name: "申花壹号", alias: "申花" },
+      { name: "金华新村", alias: "老拱墅" },
+      { name: "湖墅天玺", alias: "武林" }
+    ],
+    schools: [
+      { name: "文澜中学", stage: "初中", note: "九年一贯" },
+      { name: "上塘中学", stage: "初中", note: "集团校" }
+    ]
   },
   {
-    id: "middle-shangcheng",
-    name: "上城 · 杭高衔接",
+    id: "shangcheng-middle",
     stage: "初中",
-    coverage: "杭高求是实验、采荷中学",
-    focus: "名校初高中贯通",
-    grid: { colStart: 3, colEnd: 5, rowStart: 2, rowEnd: 3 }
+    name: "上城 · 杭高衔接圈",
+    district: "上城区",
+    description: "杭高教育集团牵头，重视项目式学习与双语。",
+    policy: "名额分配到校；民办摇号未中签自动回流公办。",
+    color: "#ff6f91",
+    layout: { colStart: 3, colEnd: 5, rowStart: 2, rowEnd: 4 },
+    communities: [
+      { name: "钱江御府", alias: "CBD" },
+      { name: "绿城柳岸晓风", alias: "钱塘江" },
+      { name: "庆春广场", alias: "庆春路" }
+    ],
+    schools: [
+      { name: "杭高求是实验学校初中", stage: "初中", note: "集团校" },
+      { name: "采荷中学教育集团", stage: "初中", note: "项目式" }
+    ]
   },
   {
-    id: "middle-qiantang",
-    name: "钱塘 · 采荷教育",
+    id: "qiantang-middle",
     stage: "初中",
-    coverage: "采荷教育集团、杭师大东城",
-    focus: "产教城融合 + 统筹派位",
-    grid: { colStart: 5, colEnd: 7, rowStart: 2, rowEnd: 3 }
+    name: "钱塘 · 采荷教育圈",
+    district: "钱塘区",
+    description: "产教城融合，采荷教育集团多校区统筹，科技社团多。",
+    policy: "指标到校+统筹派位，锁定房满 3 年优先。",
+    color: "#f79824",
+    layout: { colStart: 3, colEnd: 5, rowStart: 3, rowEnd: 5 },
+    communities: [
+      { name: "金沙湖壹号", alias: "湖区" },
+      { name: "下沙高教园", alias: "高校" },
+      { name: "新加坡科技园", alias: "东部湾" }
+    ],
+    schools: [
+      { name: "采荷教育集团东城校区", stage: "初中", note: "集团派位" },
+      { name: "杭师大东城实验", stage: "初中", note: "产教融合" }
+    ]
   }
 ];
 
-function init() {
-  renderDistrictOptions();
-  renderDistrictCards();
-  renderSchoolCards(schoolData);
-  const defaultStage = mapStageButtons.length ? mapStageButtons[0].dataset.stage : "小学";
-  renderMapZones(defaultStage);
-  updateStats();
-  bindEvents();
-}
+const clone = (value) => JSON.parse(JSON.stringify(value));
 
-function renderDistrictOptions() {
-  districtData.forEach((district) => {
-    const option = document.createElement("option");
-    option.value = district.name;
-    option.textContent = district.name;
-    districtSelect.appendChild(option);
-  });
-}
+const hasStorage = (() => {
+  try {
+    return typeof window !== "undefined" && window.localStorage;
+  } catch (error) {
+    return false;
+  }
+})();
 
-function renderDistrictCards() {
-  districtGrid.innerHTML = "";
-  districtData.forEach((district) => {
-    const card = document.createElement("article");
-    card.className = "district-card";
-    card.innerHTML = `
-      <span class="section-tag">${district.category}</span>
-      <h3>${district.name}</h3>
-      <p>${district.desc}</p>
-      <ul>
-        <li>• 关注点：${district.focus}</li>
-        <li>• 核心学校：${district.highlights.join("、")}</li>
-        <li>• 重点学校数量：${district.stats.schools} 所</li>
-      </ul>
-    `;
-    districtGrid.appendChild(card);
-  });
-}
+const loadZones = () => {
+  if (hasStorage) {
+    const cached = window.localStorage.getItem(STORAGE_KEY);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        return Array.isArray(parsed) ? parsed.map(normalizeZone) : clone(defaultZones).map(normalizeZone);
+      } catch (error) {
+        console.warn("缓存数据解析失败，使用默认数据", error);
+      }
+    }
+  }
+  return clone(defaultZones).map(normalizeZone);
+};
 
-function renderSchoolCards(data) {
-  schoolList.innerHTML = "";
-  if (!data.length) {
-    schoolList.innerHTML = "<p>暂无符合筛选条件的学校，尝试调整筛选条件。</p>";
-    return;
+const persistZones = (data) => {
+  if (!hasStorage) return;
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  let zones = loadZones();
+  let currentStage = "小学";
+  let selectedZoneId = null;
+
+  const stageTabs = document.querySelectorAll("#stageTabs button");
+  const mapGrid = document.querySelector("#mapGrid");
+  const districtFilter = document.querySelector("#districtFilter");
+  const keywordInput = document.querySelector("#keywordInput");
+  const zoneCount = document.querySelector("#zoneCount");
+
+  const infoStage = document.querySelector("#infoStage");
+  const infoTitle = document.querySelector("#infoTitle");
+  const infoSubtitle = document.querySelector("#infoSubtitle");
+  const infoDistrict = document.querySelector("#infoDistrict");
+  const infoPolicy = document.querySelector("#infoPolicy");
+  const communityCount = document.querySelector("#communityCount");
+  const schoolCount = document.querySelector("#schoolCount");
+  const communityList = document.querySelector("#communityList");
+  const schoolList = document.querySelector("#schoolList");
+
+  const adminSection = document.querySelector("#adminSection");
+  const collapseAdminBtn = document.querySelector("#collapseAdmin");
+  const scrollAdminBtn = document.querySelector("#scrollAdmin");
+  const zoneForm = document.querySelector("#zoneForm");
+  const resetFormBtn = document.querySelector("#resetForm");
+  const zoneTableBody = document.querySelector("#zoneTable tbody");
+
+  const zoneIdInput = document.querySelector("#zoneId");
+  const zoneNameInput = document.querySelector("#zoneNameInput");
+  const zoneDistrictInput = document.querySelector("#zoneDistrictInput");
+  const zoneStageInput = document.querySelector("#zoneStageInput");
+  const zoneColorInput = document.querySelector("#zoneColorInput");
+  const zonePolicyInput = document.querySelector("#zonePolicyInput");
+  const zoneDescInput = document.querySelector("#zoneDescInput");
+  const zoneColStartInput = document.querySelector("#zoneColStartInput");
+  const zoneColSpanInput = document.querySelector("#zoneColSpanInput");
+  const zoneRowStartInput = document.querySelector("#zoneRowStartInput");
+  const zoneRowSpanInput = document.querySelector("#zoneRowSpanInput");
+  const zoneCommunitiesInput = document.querySelector("#zoneCommunitiesInput");
+  const zoneSchoolsInput = document.querySelector("#zoneSchoolsInput");
+
+  const debouncedFilter = debounce(() => renderMap(), 200);
+
+  init();
+
+  function init() {
+    populateDistrictOptions();
+    renderMap();
+    renderDetails();
+    renderTable();
+    bindEvents();
   }
 
-  data.forEach((school) => {
-    const card = document.createElement("article");
-    card.className = "school-card";
-    card.innerHTML = `
-      <header>
-        <div>
-          <h3>${school.name}</h3>
-          <span>${school.district} · ${school.stage}</span>
-        </div>
-        <strong>${school.score}</strong>
-      </header>
-      <div class="badges">
-        ${[school.type, ...school.tags]
-          .map((tag) => `<span>${tag}</span>`) 
-          .join("")}
-      </div>
-      <p>${school.features}</p>
-      <footer>
-        <span>${school.address}</span>
-        <a href="tel:${school.hotline}">咨询</a>
-      </footer>
-    `;
-    schoolList.appendChild(card);
-  });
-}
-
-function updateStats() {
-  statDistricts.textContent = districtData.length;
-  statSchools.textContent = schoolData.length;
-}
-
-function bindEvents() {
-  tagButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const tag = button.dataset.tag;
-      if (activeTags.has(tag)) {
-        activeTags.delete(tag);
-        button.classList.remove("active");
-      } else {
-        activeTags.add(tag);
-        button.classList.add("active");
-      }
-      applyFilters();
-    });
-  });
-
-  stageCheckboxes.forEach((checkbox) => {
-    checkbox.addEventListener("change", applyFilters);
-  });
-
-  districtSelect.addEventListener("change", applyFilters);
-  searchInput.addEventListener("input", debounce(applyFilters, 200));
-  resetButton.addEventListener("click", resetFilters);
-  quickMatchButton.addEventListener("click", simulateMatch);
-
-  if (mapStageButtons.length) {
-    mapStageButtons.forEach((button, index) => {
-      button.addEventListener("click", () => {
-        mapStageButtons.forEach((btn) => {
+  function bindEvents() {
+    stageTabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        stageTabs.forEach((btn) => {
           btn.classList.remove("active");
           btn.setAttribute("aria-selected", "false");
         });
-        button.classList.add("active");
-        button.setAttribute("aria-selected", "true");
-        renderMapZones(button.dataset.stage);
+        tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
+        currentStage = tab.dataset.stage;
+        selectedZoneId = null;
+        renderMap();
+        renderDetails();
       });
-      if (index === 0) {
-        button.setAttribute("aria-selected", "true");
+    });
+
+    districtFilter?.addEventListener("change", renderMap);
+    keywordInput?.addEventListener("input", debouncedFilter);
+
+    scrollAdminBtn?.addEventListener("click", () => {
+      adminSection?.scrollIntoView({ behavior: "smooth" });
+    });
+
+    collapseAdminBtn?.addEventListener("click", () => {
+      adminSection?.classList.toggle("collapsed");
+      const expanded = collapseAdminBtn.getAttribute("aria-expanded") === "true";
+      collapseAdminBtn.setAttribute("aria-expanded", String(!expanded));
+      collapseAdminBtn.textContent = expanded ? "展开后台" : "收起后台";
+    });
+
+    zoneForm?.addEventListener("submit", handleFormSubmit);
+    resetFormBtn?.addEventListener("click", () => {
+      zoneForm?.reset();
+      zoneIdInput.value = "";
+    });
+
+    zoneTableBody?.addEventListener("click", (event) => {
+      const actionBtn = event.target.closest("button[data-action]");
+      if (!actionBtn) return;
+      const { action, id } = actionBtn.dataset;
+      if (action === "edit") {
+        fillForm(id);
+      } else if (action === "delete") {
+        deleteZone(id);
       }
     });
   }
-}
 
-function applyFilters() {
-  const keyword = searchInput.value.trim();
-  const selectedDistrict = districtSelect.value;
-  const selectedStages = Array.from(stageCheckboxes)
-    .filter((box) => box.checked)
-    .map((box) => box.value);
+  function getFilteredZones() {
+    const districtValue = districtFilter?.value || "all";
+    const keyword = keywordInput?.value.trim().toLowerCase() || "";
 
-  const filtered = schoolData.filter((school) => {
-    const matchKeyword = keyword
-      ? [school.name, school.district, school.features, school.tags.join(" ")]
-          .join(" ")
-          .includes(keyword)
-      : true;
+    return zones.filter((zone) => {
+      if (zone.stage !== currentStage) return false;
+      const matchDistrict = districtValue === "all" || zone.district === districtValue;
+      const matchKeyword = keyword
+        ? [
+            zone.name,
+            zone.district,
+            zone.description,
+            zone.communities.map((c) => c.name).join(" "),
+            zone.schools.map((s) => s.name).join(" ")
+          ]
+            .join(" ")
+            .toLowerCase()
+            .includes(keyword)
+        : true;
+      return matchDistrict && matchKeyword;
+    });
+  }
 
-    const matchDistrict = selectedDistrict === "all" || school.district === selectedDistrict;
-    const matchStage = selectedStages.includes(school.stage);
-    const matchTags = activeTags.size
-      ? Array.from(activeTags).every((tag) => 
-          [school.type, ...school.tags].some((item) => item.includes(tag))
-        )
-      : true;
+  function renderMap() {
+    if (!mapGrid) return;
+    const filtered = getFilteredZones();
+    zoneCount.textContent = filtered.length;
+    mapGrid.innerHTML = "";
 
-    return matchKeyword && matchDistrict && matchStage && matchTags;
-  });
+    if (!filtered.length) {
+      const empty = document.createElement("p");
+      empty.className = "empty-state";
+      empty.textContent = "暂无符合条件的学区，请调整筛选条件。";
+      mapGrid.appendChild(empty);
+      renderDetails();
+      return;
+    }
 
-  renderSchoolCards(filtered);
-}
+    filtered.forEach((zone) => {
+      const zoneBtn = document.createElement("button");
+      zoneBtn.type = "button";
+      zoneBtn.className = "map-zone";
+      zoneBtn.dataset.id = zone.id;
+      zoneBtn.dataset.stage = zone.stage;
+      zoneBtn.style.setProperty("--zone-color", zone.color);
+      zoneBtn.style.gridColumn = `${zone.layout.colStart} / ${zone.layout.colEnd}`;
+      zoneBtn.style.gridRow = `${zone.layout.rowStart} / ${zone.layout.rowEnd}`;
+      zoneBtn.innerHTML = `
+        <div>
+          <strong>${zone.name}</strong>
+          <span>${zone.district}</span>
+        </div>
+        <div class="zone-communities">
+          ${zone.communities
+            .slice(0, 3)
+            .map((community) => `<span>${community.name}</span>`)
+            .join("")}
+        </div>
+      `;
+      if (zone.id === selectedZoneId) {
+        zoneBtn.classList.add("active");
+      }
+      zoneBtn.addEventListener("click", () => toggleSelection(zone.id));
+      mapGrid.appendChild(zoneBtn);
+    });
 
-function resetFilters() {
-  activeTags.clear();
-  tagButtons.forEach((button) => button.classList.remove("active"));
-  districtSelect.value = "all";
-  stageCheckboxes.forEach((checkbox) => (checkbox.checked = true));
-  searchInput.value = "";
-  renderSchoolCards(schoolData);
-}
+    if (selectedZoneId) {
+      const stillVisible = filtered.some((zone) => zone.id === selectedZoneId);
+      if (!stillVisible) {
+        selectedZoneId = null;
+        renderDetails();
+      }
+    }
+  }
 
-function simulateMatch() {
-  const suggestions = schoolData
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 3)
-    .map((school) => `${school.name}（${school.district}·${school.stage}）`)
-    .join("\n");
+  function toggleSelection(zoneId) {
+    if (selectedZoneId === zoneId) {
+      selectedZoneId = null;
+      renderDetails();
+    } else {
+      selectedZoneId = zoneId;
+      const zone = zones.find((item) => item.id === zoneId);
+      renderDetails(zone);
+    }
+    renderMap();
+  }
 
-  alert(`根据基础数据为你推荐：\n${suggestions}\n可继续使用筛选进一步匹配。`);
-}
+  function renderDetails(zone = null) {
+    if (!infoTitle) return;
+    const baseStage = zone?.stage || currentStage;
+    infoStage.textContent = baseStage;
+
+    if (!zone) {
+      infoTitle.textContent = "请选择一个色块";
+      infoSubtitle.textContent = "地图中颜色越深代表优先级越高，点击即可查看详细信息。";
+      infoDistrict.textContent = "-";
+      infoPolicy.textContent = "-";
+      communityCount.textContent = "0 个";
+      schoolCount.textContent = "0 所";
+      communityList.innerHTML = "";
+      schoolList.innerHTML = "";
+      return;
+    }
+
+    infoTitle.textContent = zone.name;
+    infoSubtitle.textContent = zone.description;
+    infoDistrict.textContent = zone.district;
+    infoPolicy.textContent = zone.policy;
+    communityCount.textContent = `${zone.communities.length} 个`;
+    schoolCount.textContent = `${zone.schools.length} 所`;
+
+    communityList.innerHTML = zone.communities
+      .map((community) => {
+        const alias = community.alias ? `<small>${community.alias}</small>` : "";
+        return `<li><span>${community.name}</span>${alias}</li>`;
+      })
+      .join("");
+
+    schoolList.innerHTML = zone.schools
+      .map((school) => {
+        const note = school.note ? `<small>${school.note}</small>` : "";
+        return `<li><strong>${school.name}</strong><span>${school.stage}</span>${note}</li>`;
+      })
+      .join("");
+  }
+
+  function populateDistrictOptions() {
+    if (!districtFilter) return;
+    const previous = districtFilter.value;
+    const districts = Array.from(new Set(zones.map((zone) => zone.district)));
+    districtFilter.innerHTML = '<option value="all">全部区域</option>';
+    districts.forEach((district) => {
+      const option = document.createElement("option");
+      option.value = district;
+      option.textContent = district;
+      districtFilter.appendChild(option);
+    });
+    if (districts.includes(previous)) {
+      districtFilter.value = previous;
+    }
+  }
+
+  function handleFormSubmit(event) {
+    event.preventDefault();
+    const layout = buildLayout();
+
+    let zoneData = {
+      id: zoneIdInput.value || `zone-${Date.now()}`,
+      name: zoneNameInput.value.trim(),
+      district: zoneDistrictInput.value.trim(),
+      stage: zoneStageInput.value,
+      color: zoneColorInput.value.trim() || "#3058ff",
+      policy: zonePolicyInput.value.trim(),
+      description: zoneDescInput.value.trim(),
+      layout,
+      communities: parseCommunities(zoneCommunitiesInput.value),
+      schools: parseSchools(zoneSchoolsInput.value)
+    };
+
+    zoneData = normalizeZone(zoneData);
+    zoneData.schools = zoneData.schools.map((school) => ({
+      ...school,
+      stage: school.stage || zoneData.stage
+    }));
+
+    if (!zoneData.communities.length) {
+      zoneData.communities.push({ name: "待补充", alias: "" });
+    }
+
+    if (!zoneData.schools.length) {
+      zoneData.schools.push({ name: "待补充", stage: zoneData.stage, note: "" });
+    }
+
+    const existingIndex = zones.findIndex((zone) => zone.id === zoneData.id);
+    if (existingIndex >= 0) {
+      zones[existingIndex] = zoneData;
+    } else {
+      zones.push(zoneData);
+    }
+
+    persistZones(zones);
+    populateDistrictOptions();
+    renderMap();
+    renderTable();
+    if (selectedZoneId === zoneData.id) {
+      renderDetails(zoneData);
+    }
+    zoneForm?.reset();
+    zoneIdInput.value = "";
+  }
+
+  function buildLayout() {
+    const colStart = Number(zoneColStartInput.value) || 1;
+    const colSpan = Math.max(1, Number(zoneColSpanInput.value) || 1);
+    const rowStart = Number(zoneRowStartInput.value) || 1;
+    const rowSpan = Math.max(1, Number(zoneRowSpanInput.value) || 1);
+
+    const colEnd = Math.min(5, colStart + colSpan);
+    const rowEnd = Math.min(5, rowStart + rowSpan);
+
+    return { colStart, colEnd, rowStart, rowEnd };
+  }
+
+  function parseCommunities(value) {
+    return value
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [name, alias = ""] = line.split("|").map((item) => item.trim());
+        return { name, alias };
+      });
+  }
+
+  function parseSchools(value) {
+    return value
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [name, stage = "", note = ""] = line.split("|").map((item) => item.trim());
+        return { name, stage: stage || "小学", note };
+      });
+  }
+
+  function renderTable() {
+    if (!zoneTableBody) return;
+    zoneTableBody.innerHTML = "";
+    const sorted = [...zones].sort((a, b) => {
+      if (a.stage === b.stage) {
+        return a.district.localeCompare(b.district, "zh-Hans-CN");
+      }
+      return a.stage.localeCompare(b.stage, "zh-Hans-CN");
+    });
+
+    sorted.forEach((zone) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><span class="table-color" style="background:${zone.color}"></span>${zone.name}</td>
+        <td>${zone.stage}</td>
+        <td>${zone.district}</td>
+        <td>${zone.communities.length}</td>
+        <td>${zone.schools.length}</td>
+        <td>
+          <button class="table-btn edit" data-action="edit" data-id="${zone.id}">编辑</button>
+          <button class="table-btn danger" data-action="delete" data-id="${zone.id}">删除</button>
+        </td>
+      `;
+      zoneTableBody.appendChild(row);
+    });
+  }
+
+  function fillForm(id) {
+    const zone = zones.find((item) => item.id === id);
+    if (!zone) return;
+    zoneIdInput.value = zone.id;
+    zoneNameInput.value = zone.name;
+    zoneDistrictInput.value = zone.district;
+    zoneStageInput.value = zone.stage;
+    zoneColorInput.value = zone.color;
+    zonePolicyInput.value = zone.policy;
+    zoneDescInput.value = zone.description;
+    zoneColStartInput.value = zone.layout.colStart;
+    zoneColSpanInput.value = Math.max(1, zone.layout.colEnd - zone.layout.colStart);
+    zoneRowStartInput.value = zone.layout.rowStart;
+    zoneRowSpanInput.value = Math.max(1, zone.layout.rowEnd - zone.layout.rowStart);
+    zoneCommunitiesInput.value = zone.communities
+      .map((community) => (community.alias ? `${community.name}|${community.alias}` : community.name))
+      .join("\n");
+    zoneSchoolsInput.value = zone.schools
+      .map((school) => {
+        const parts = [school.name, school.stage, school.note].filter(Boolean);
+        return parts.join("|");
+      })
+      .join("\n");
+    zoneForm.scrollIntoView({ behavior: "smooth" });
+  }
+
+  function deleteZone(id) {
+    const zone = zones.find((item) => item.id === id);
+    if (!zone) return;
+    const confirmed = window.confirm(`确定删除“${zone.name}”数据吗？`);
+    if (!confirmed) return;
+    zones = zones.filter((item) => item.id !== id);
+    if (selectedZoneId === id) {
+      selectedZoneId = null;
+      renderDetails();
+    }
+    persistZones(zones);
+    populateDistrictOptions();
+    renderMap();
+    renderTable();
+  }
+});
 
 function debounce(fn, wait = 200) {
   let timer = null;
   return (...args) => {
     clearTimeout(timer);
-    timer = setTimeout(() => fn.apply(this, args), wait);
+    timer = setTimeout(() => fn.apply(null, args), wait);
   };
-}
-
-window.addEventListener("DOMContentLoaded", init);
-
-function renderMapZones(stage = "小学") {
-  if (!mapCanvas || !mapDetails) return;
-  const stageZones = mapZones.filter((zone) => zone.stage === stage);
-  mapCanvas.innerHTML = "";
-  mapDetails.innerHTML = "";
-
-  stageZones.forEach((zone) => {
-    const cell = document.createElement("button");
-    cell.type = "button";
-    cell.className = "map-cell";
-    cell.dataset.stage = zone.stage;
-    cell.dataset.zone = zone.id;
-    cell.style.gridColumn = `${zone.grid.colStart} / ${zone.grid.colEnd}`;
-    cell.style.gridRow = `${zone.grid.rowStart} / ${zone.grid.rowEnd}`;
-    cell.innerHTML = `<span>${zone.name}</span>`;
-    cell.addEventListener("click", () => highlightMapZone(zone.id));
-    mapCanvas.appendChild(cell);
-
-    const detail = document.createElement("article");
-    detail.className = "map-detail-card";
-    detail.dataset.zone = zone.id;
-    detail.innerHTML = `
-      <strong>${zone.name}</strong>
-      <span>覆盖：${zone.coverage}</span>
-      <span>关注：${zone.focus}</span>
-    `;
-    detail.addEventListener("click", () => highlightMapZone(zone.id));
-    mapDetails.appendChild(detail);
-  });
-
-  if (stageZones.length) {
-    highlightMapZone(stageZones[0].id);
-  }
-}
-
-function highlightMapZone(zoneId) {
-  if (!mapCanvas || !mapDetails) return;
-  mapCanvas.querySelectorAll(".map-cell").forEach((cell) => {
-    cell.classList.toggle("active", cell.dataset.zone === zoneId);
-  });
-  mapDetails.querySelectorAll(".map-detail-card").forEach((card) => {
-    card.classList.toggle("active", card.dataset.zone === zoneId);
-  });
 }

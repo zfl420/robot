@@ -87,6 +87,38 @@
       </div>
     </section>
 
+    <section class="district-map" id="districtMap">
+      <div class="section-header">
+        <div>
+          <p class="section-tag">学区地图</p>
+          <h2>小学 / 初中学区划分一目了然</h2>
+        </div>
+        <div class="map-stage-toggle" id="mapStageToggle" role="tablist" aria-label="选择学区阶段">
+          <button type="button" data-stage="小学" class="active" role="tab" aria-selected="true">小学</button>
+          <button type="button" data-stage="初中" role="tab" aria-selected="false">初中</button>
+        </div>
+      </div>
+      <p class="map-subtitle">根据公开入学政策整理，将杭州市重点片区按课程阶段拆分，配合集团学校与入学关注点，帮助家庭快速锁定目标学区。</p>
+      <div class="map-legend">
+        <div class="legend-item">
+          <span class="legend-color legend-color--primary"></span>
+          <div>
+            <p>小学片区</p>
+            <small>以集团小学、九年一贯小学部为主</small>
+          </div>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color legend-color--secondary"></span>
+          <div>
+            <p>初中片区</p>
+            <small>以初中部、九年一贯初中段为主</small>
+          </div>
+        </div>
+      </div>
+      <div class="map-canvas" id="mapCanvas" aria-live="polite"></div>
+      <div class="map-details" id="mapDetails"></div>
+    </section>
+
     <section class="district-grid" id="districtGrid"></section>
 
     <section class="schools" id="schoolsSection">

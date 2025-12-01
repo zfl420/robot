@@ -147,13 +147,101 @@ const statDistricts = document.querySelector("#statDistricts");
 const statSchools = document.querySelector("#statSchools");
 const resetButton = document.querySelector("#resetFilters");
 const quickMatchButton = document.querySelector("#quickMatch");
+const mapStageButtons = document.querySelectorAll("#mapStageToggle button");
+const mapCanvas = document.querySelector("#mapCanvas");
+const mapDetails = document.querySelector("#mapDetails");
 
 const activeTags = new Set();
+
+const mapZones = [
+  {
+    id: "primary-xihu",
+    name: "西湖 · 文教圈",
+    stage: "小学",
+    coverage: "学军小学、文二教育集团",
+    focus: "积分排序 + 人户一致优先",
+    grid: { colStart: 1, colEnd: 3, rowStart: 1, rowEnd: 2 }
+  },
+  {
+    id: "primary-binj",
+    name: "滨江 · 高新走廊",
+    stage: "小学",
+    coverage: "滨和实验、浦沿小学集团",
+    focus: "科技社团 + 高知家庭集中",
+    grid: { colStart: 3, colEnd: 5, rowStart: 1, rowEnd: 2 }
+  },
+  {
+    id: "primary-gongshu",
+    name: "拱墅 · 大运河",
+    stage: "小学",
+    coverage: "文澜实验、求是教育集团",
+    focus: "九年一贯小学部占比高",
+    grid: { colStart: 1, colEnd: 3, rowStart: 2, rowEnd: 3 }
+  },
+  {
+    id: "primary-shangcheng",
+    name: "上城 · 钱江新城",
+    stage: "小学",
+    coverage: "娃哈哈小学、胜利教育集团",
+    focus: "民办 & 公办名校扎堆",
+    grid: { colStart: 3, colEnd: 5, rowStart: 2, rowEnd: 3 }
+  },
+  {
+    id: "primary-qiantang",
+    name: "钱塘 · 沿江融合",
+    stage: "小学",
+    coverage: "采荷实验钱塘、下沙二小",
+    focus: "新盘集中 + 指定划片",
+    grid: { colStart: 5, colEnd: 7, rowStart: 2, rowEnd: 3 }
+  },
+  {
+    id: "middle-xihu",
+    name: "西湖 · 学军中学圈",
+    stage: "初中",
+    coverage: "学军中学本部、竞舟校区",
+    focus: "名额分配 + 竞赛资源",
+    grid: { colStart: 1, colEnd: 3, rowStart: 1, rowEnd: 2 }
+  },
+  {
+    id: "middle-binj",
+    name: "滨江 · 浙师附中圈",
+    stage: "初中",
+    coverage: "杭师大附外、滨文中学",
+    focus: "科创课程 + 双语融合",
+    grid: { colStart: 3, colEnd: 5, rowStart: 1, rowEnd: 2 }
+  },
+  {
+    id: "middle-gongshu",
+    name: "拱墅 · 文澜实验",
+    stage: "初中",
+    coverage: "文澜中学、上塘中学",
+    focus: "集团化直升 + 转学严控",
+    grid: { colStart: 1, colEnd: 3, rowStart: 2, rowEnd: 3 }
+  },
+  {
+    id: "middle-shangcheng",
+    name: "上城 · 杭高衔接",
+    stage: "初中",
+    coverage: "杭高求是实验、采荷中学",
+    focus: "名校初高中贯通",
+    grid: { colStart: 3, colEnd: 5, rowStart: 2, rowEnd: 3 }
+  },
+  {
+    id: "middle-qiantang",
+    name: "钱塘 · 采荷教育",
+    stage: "初中",
+    coverage: "采荷教育集团、杭师大东城",
+    focus: "产教城融合 + 统筹派位",
+    grid: { colStart: 5, colEnd: 7, rowStart: 2, rowEnd: 3 }
+  }
+];
 
 function init() {
   renderDistrictOptions();
   renderDistrictCards();
   renderSchoolCards(schoolData);
+  const defaultStage = mapStageButtons.length ? mapStageButtons[0].dataset.stage : "小学";
+  renderMapZones(defaultStage);
   updateStats();
   bindEvents();
 }
@@ -247,6 +335,23 @@ function bindEvents() {
   searchInput.addEventListener("input", debounce(applyFilters, 200));
   resetButton.addEventListener("click", resetFilters);
   quickMatchButton.addEventListener("click", simulateMatch);
+
+  if (mapStageButtons.length) {
+    mapStageButtons.forEach((button, index) => {
+      button.addEventListener("click", () => {
+        mapStageButtons.forEach((btn) => {
+          btn.classList.remove("active");
+          btn.setAttribute("aria-selected", "false");
+        });
+        button.classList.add("active");
+        button.setAttribute("aria-selected", "true");
+        renderMapZones(button.dataset.stage);
+      });
+      if (index === 0) {
+        button.setAttribute("aria-selected", "true");
+      }
+    });
+  }
 }
 
 function applyFilters() {
@@ -305,3 +410,48 @@ function debounce(fn, wait = 200) {
 }
 
 window.addEventListener("DOMContentLoaded", init);
+
+function renderMapZones(stage = "小学") {
+  if (!mapCanvas || !mapDetails) return;
+  const stageZones = mapZones.filter((zone) => zone.stage === stage);
+  mapCanvas.innerHTML = "";
+  mapDetails.innerHTML = "";
+
+  stageZones.forEach((zone) => {
+    const cell = document.createElement("button");
+    cell.type = "button";
+    cell.className = "map-cell";
+    cell.dataset.stage = zone.stage;
+    cell.dataset.zone = zone.id;
+    cell.style.gridColumn = `${zone.grid.colStart} / ${zone.grid.colEnd}`;
+    cell.style.gridRow = `${zone.grid.rowStart} / ${zone.grid.rowEnd}`;
+    cell.innerHTML = `<span>${zone.name}</span>`;
+    cell.addEventListener("click", () => highlightMapZone(zone.id));
+    mapCanvas.appendChild(cell);
+
+    const detail = document.createElement("article");
+    detail.className = "map-detail-card";
+    detail.dataset.zone = zone.id;
+    detail.innerHTML = `
+      <strong>${zone.name}</strong>
+      <span>覆盖：${zone.coverage}</span>
+      <span>关注：${zone.focus}</span>
+    `;
+    detail.addEventListener("click", () => highlightMapZone(zone.id));
+    mapDetails.appendChild(detail);
+  });
+
+  if (stageZones.length) {
+    highlightMapZone(stageZones[0].id);
+  }
+}
+
+function highlightMapZone(zoneId) {
+  if (!mapCanvas || !mapDetails) return;
+  mapCanvas.querySelectorAll(".map-cell").forEach((cell) => {
+    cell.classList.toggle("active", cell.dataset.zone === zoneId);
+  });
+  mapDetails.querySelectorAll(".map-detail-card").forEach((card) => {
+    card.classList.toggle("active", card.dataset.zone === zoneId);
+  });
+}

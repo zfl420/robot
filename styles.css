@@ -8,6 +8,8 @@
   --text-muted: #6b7280;
   --border: #e5e7eb;
   --shadow: 0 25px 45px rgba(15, 23, 42, 0.08);
+  --map-primary: #f97316;
+  --map-secondary: #14b8a6;
 }
 
 * {
@@ -195,6 +197,146 @@ main {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.5rem;
+}
+
+.district-map {
+  background: var(--surface);
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.map-subtitle {
+  color: var(--text-muted);
+}
+
+.map-stage-toggle {
+  display: flex;
+  gap: 0.5rem;
+  background: #eef2ff;
+  padding: 0.4rem;
+  border-radius: 999px;
+}
+
+.map-stage-toggle button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 1.25rem;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--accent);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.map-stage-toggle button.active {
+  background: #fff;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.12);
+}
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 20px;
+  padding: 1rem;
+  background: #f8fafc;
+}
+
+.legend-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.legend-color {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+}
+
+.legend-color--primary {
+  background: var(--map-primary);
+}
+
+.legend-color--secondary {
+  background: var(--map-secondary);
+}
+
+.map-canvas {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(60px, 1fr));
+  grid-auto-rows: minmax(60px, 1fr);
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-radius: 28px;
+  background: radial-gradient(circle at 30% 30%, rgba(37, 99, 235, 0.06), transparent 55%), #f1f5f9;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  min-height: 280px;
+}
+
+.map-cell {
+  border: none;
+  border-radius: 18px;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.35;
+  box-shadow: 0 12px 20px rgba(15, 23, 42, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.map-cell[data-stage="小学"] {
+  background: linear-gradient(145deg, var(--map-primary), #fb923c);
+}
+
+.map-cell[data-stage="初中"] {
+  background: linear-gradient(145deg, var(--map-secondary), #2dd4bf);
+}
+
+.map-cell:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 28px rgba(15, 23, 42, 0.25);
+}
+
+.map-cell.active {
+  outline: 3px solid rgba(255, 255, 255, 0.7);
+}
+
+.map-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.map-detail-card {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 1rem;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.map-detail-card.active {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.map-detail-card span {
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }
 
 .filter-group label {
@@ -420,6 +562,7 @@ main {
 
   .hero,
   .filters,
+  .map-details,
   .school-list,
   .district-grid,
   .timeline__grid,

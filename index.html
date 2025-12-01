@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>杭州学区地图 | 杭州入学一站式指南</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Han+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">杭州学区指南</div>
+    <nav class="site-nav">
+      <a href="#districtGrid">重点学区</a>
+      <a href="#schoolsSection">学校清单</a>
+      <a href="#timeline">入学日程</a>
+      <a href="#resources">政策信息</a>
+    </nav>
+    <button class="cta-button">一键咨询</button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero__content">
+        <p class="hero__tag">2025 入学季全新数据</p>
+        <h1>快速了解杭州热门学区与优质公办民办学校</h1>
+        <p class="hero__subtitle">整合西湖、滨江、钱塘等重点学区政策、学校口碑与入学时间表，助你 10 分钟建立专属选校清单。</p>
+        <div class="hero__actions">
+          <div class="search-box">
+            <span>🔍</span>
+            <input id="searchInput" type="search" placeholder="搜索学校 / 学区 / 关键词">
+          </div>
+          <button class="primary" id="quickMatch">智能匹配</button>
+        </div>
+        <div class="hero__stats">
+          <div>
+            <strong id="statDistricts">0</strong>
+            <span>热门学区</span>
+          </div>
+          <div>
+            <strong id="statSchools">0</strong>
+            <span>重点学校</span>
+          </div>
+          <div>
+            <strong>72h</strong>
+            <span>更新频率</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero__card">
+        <h3>杭州2025 入学重点提醒</h3>
+        <ul>
+          <li>民办电脑派位预计 5 月下旬进行</li>
+          <li>部分区小学仍需现场信息确认</li>
+          <li>热门公办仍以学区房产证时间为序</li>
+        </ul>
+        <button class="secondary">下载最新政策 PDF</button>
+      </div>
+    </section>
+
+    <section class="filters">
+      <div class="filter-group">
+        <label for="districtFilter">学区</label>
+        <select id="districtFilter">
+          <option value="all">全部</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>关注标签</label>
+        <div class="tag-filter" id="tagFilter">
+          <button data-tag="公办">公办</button>
+          <button data-tag="民办">民办</button>
+          <button data-tag="学军系">学军系</button>
+          <button data-tag="科技特色">科技特色</button>
+          <button data-tag="双语">双语</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>课程阶段</label>
+        <div class="stage-filter">
+          <label><input type="checkbox" value="小学" checked> 小学</label>
+          <label><input type="checkbox" value="初中" checked> 初中</label>
+          <label><input type="checkbox" value="九年一贯" checked> 九年一贯</label>
+        </div>
+      </div>
+    </section>
+
+    <section class="district-grid" id="districtGrid"></section>
+
+    <section class="schools" id="schoolsSection">
+      <div class="section-header">
+        <div>
+          <p class="section-tag">杭州重点学校清单</p>
+          <h2>按照学区与课程阶段筛选</h2>
+        </div>
+        <button class="secondary" id="resetFilters">重置筛选</button>
+      </div>
+      <div class="school-list" id="schoolList"></div>
+    </section>
+
+    <section class="timeline" id="timeline">
+      <h2>2025 入学时间表</h2>
+      <div class="timeline__grid">
+        <article>
+          <span class="timeline__date">3 月</span>
+          <h3>材料准备</h3>
+          <p>核对户籍、房产、居住证明及学籍信息，部分区需在线预约。</p>
+        </article>
+        <article>
+          <span class="timeline__date">4 月</span>
+          <h3>网上报名</h3>
+          <p>各区教育局开放报名系统，需提前完成信息核验。</p>
+        </article>
+        <article>
+          <span class="timeline__date">5-6 月</span>
+          <h3>电脑派位 / 现场确认</h3>
+          <p>民办学校统一电脑派位，未录取自动回流公办。</p>
+        </article>
+        <article>
+          <span class="timeline__date">7-8 月</span>
+          <h3>录取与报到</h3>
+          <p>公办学校陆续发放录取通知，需按校要求完成报到。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="resources" id="resources">
+      <div class="section-header">
+        <div>
+          <p class="section-tag">政策与数据</p>
+          <h2>快速掌握真实信息</h2>
+        </div>
+        <button class="secondary">订阅政策更新</button>
+      </div>
+      <div class="resource-grid">
+        <article>
+          <h3>官方政策速递</h3>
+          <p>同步杭州教育局与各区教育局最新文件，提供 PDF 下载与关键解读。</p>
+          <a href="#">查看政策 →</a>
+        </article>
+        <article>
+          <h3>家长口碑热度</h3>
+          <p>收集 300+ 家长真实反馈，结合学业表现与社团资源形成热度评分。</p>
+          <a href="#">查看评分 →</a>
+        </article>
+        <article>
+          <h3>房产与学籍提醒</h3>
+          <p>各区锁定政策不同，自动提醒房产年限、落户天数等硬性指标。</p>
+          <a href="#">获取提醒 →</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="faq">
+      <h2>常见问题</h2>
+      <div class="faq__list">
+        <details open>
+          <summary>热门公办学区的招生顺序如何？</summary>
+          <p>多数区采用“人户一致优先 → 多孩 → 人户分离”的顺序，若仍超额则按房产证时间或电脑派位。</p>
+        </details>
+        <details>
+          <summary>民办学校还能跨区报名吗？</summary>
+          <p>根据 2023 年起执行的新政，民办义务段学校继续坚持全市统筹电脑派位，跨区报名不受限。</p>
+        </details>
+        <details>
+          <summary>九年一贯学校需要单独派位吗？</summary>
+          <p>部分九年一贯学校的小初衔接需要参加内部考察或综合评价，建议提前关注校内通知。</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <strong>杭州学区指南</strong>
+      <p>基于公开数据与家长实地探访整理，帮助家庭高效决策。</p>
+    </div>
+    <div>
+      <p>咨询微信：hz-school</p>
+      <p>合作邮箱：edu@hzplanner.cn</p>
+    </div>
+    <small>© 2025 Hangzhou School Planner</small>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
